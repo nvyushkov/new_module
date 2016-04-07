@@ -3,50 +3,40 @@ var Menu        = require('adminDBModels/menus').Menu;
 var Material    = require('adminDBModels/materials').Material;
 var Widget      = require('adminDBModels/widgets').Widget;
 var path        = require('path');
-
 var dir_d       = ['jsonDataPage/menus','jsonDataPage/materials','jsonDataPage/widgets']; // все пути для jSON файлов внутри модуля
 var param_S     = [ Menu, Material, Widget]; // добавляем наши модеи в массив
-var i           = 0;
+var yum 	= 0; // счетчик для определения завершения чтения
 
-// Парсим файлы jSon из директорий, сохраняем из них данные,  получаем записи из базы нужной коллекции и отдаем их
-var jsonDateTransfer = function(callback) {
-
-    for(i=0; i<param_S.length; i++) {  // перебираем массив с моделями, пока весь не перебран, вызываем функию чтения директории
-        var dir = dir_d[i];
-        var par = param_S[i];
-        readDir(dir, par);
-    }
-    setTimeout(callback, 100);  // т.к. нод синхрон - то немного разрываем время что бы колбек вызывался после цикла
-};
-
-// читаем директорию
-var readDir = function(dir, par) {
-    fs.readdir( dir, function(err, files) { 
-        if (err) throw err;
-        files.forEach( function(filename) { // пеербираем каждый файл в директории
-            var ext = path.extname(filename); // берем расширение текущего файла
-            if ( ext == '.json' ) { // является ли текущий файл .json
-                fs.readFile( dir +'/' + filename, function(err, data) {  // читаем текущий .json файл
-                    if (err) throw err; 
-                    var saveData = new par(JSON.parse(data));  // парсим данные файла в json и заносим в переменную
-                    saveData.save(function(err) {  // сохраняем переменную  базу
-                        if (err) throw err;
-                    })
-                } )
-            }
-        } )
-    });
-};
-
-// функция забирает все данные из базы наших коллекций в массиве param_S
-var baseRead = function() {
-    param_S.forEach( function(modelName) {  // для каждой коллекции 
-        modelName.find( {} , function(err, data) { // ищем в текущей коллекции все данные
-            if (err) throw err;
-            console.log(data); // выводим данные текущей коллекции
+function pushDataJson(){
+    dir_d.forEach( function(directory){  		// для каждого элемента массива директорий
+        fs.readdir( directory, function(err, files){ 	// открываем текущую директорию
+            if (err) { console.log(err)}		
+            files.forEach( function(filename){		// для каждого файла в текущей директории
+                if ( path.extname(filename) == ".json" ) { // проверяем расширение файла на .json
+                    fs.readFile(directory+'/'+filename, function(err, data) { // читаем json файл
+                        var indexDir = dir_d.indexOf(directory); // берем индекс директории в массиве
+                        var model = param_S[indexDir]; // считаем нужную нам модель в массиве моделе
+                        var saveD = new model(JSON.parse(data)); // данные из файла json в переменную
+                        saveD.save(function(err) { // сохраняем наши данные
+                            if (err) throw err;
+                            yum+=1; // увеличиваем количество пройденных элементов
+				// если прошли все элементы и записали в базу - вызываем функцию чтения
+                            yum==dir_d.length? read() : false 
+                        });
+                    });
+                }
+            } );
         });
-    } )
-};
+    });
+}
 
-jsonDateTransfer( function() { baseRead() } );  // вызываем цель функций
+function read(){
+    param_S.forEach(function (modelName) {  // для каждой коллекции
+        modelName.find({}, function (err, data) { // ищем в текущей коллекции все данные
+            if (err) throw err;
+            console.log(data); // выводим данные из базы
+        });
+    });
+}
 
+pushDataJson();  //вызываем функцию работы с файлами json
