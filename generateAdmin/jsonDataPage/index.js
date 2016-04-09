@@ -2,9 +2,9 @@
 var fs          = require('fs');
 var path        = require('path');
 // загружаем модели
-var Material    = require('adminDBModels/index')('materials');
-var Menus       = require('adminDBModels/index')('menus');
-var Widget      = require('adminDBModels/index')('widgets');
+var Material    = require('adminDBModels')('materials');
+var Menus       = require('adminDBModels')('menus');
+var Widget      = require('adminDBModels')('widgets');
 // массив директорий jSON файлов
 var dirArr      = ['./jsonDataPage/materials','./jsonDataPage/menus','./jsonDataPage/widgets'];
 // массив загруженных моделей
