@@ -32,7 +32,7 @@ module.exports = function(callback) {
             yum+=1; // считаем записанные файлы
             // если количество записанных файлов равна их количеству вмассиве jsonFiles, запускаем колбек
             if ( yum==dirArr.length ){
-              callback(null,true)
+                callback(null,true)
             }
         });
     });
