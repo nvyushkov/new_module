@@ -9,8 +9,10 @@ var Widget      = require('adminDBModels')('widgets');
 var dirArr      = ['./jsonDataPage/materials','./jsonDataPage/menus','./jsonDataPage/widgets'];
 // массив загруженных моделей
 var modArr      = [ Material, Menus, Widget ];
-// считалка
+// переменные
 var yum         = 0;
+var index       = 0;
+var saveD       = '';
 
 module.exports = function(callback) {
     dirArr.forEach(function( directory ){                       // перебираем директории
@@ -20,11 +22,11 @@ module.exports = function(callback) {
                 if (path.extname(jsonFile) == ".json") {
                     fs.readFile(directory+'/'+jsonFile, function(err, data) { // читаем json файл
                         if (err) { console.log(err)}
-                        var index = dirArr.indexOf(directory);
-                        var model = modArr[index];
-                        var saveD = new model(JSON.parse(data));    // данные из файла json в переменную, парся в формате jSON
+                        index = dirArr.indexOf(directory);
+                        model = modArr[index];
+                        saveD = new model(JSON.parse(data));    // данные из файла json в переменную, парся в формате jSON
                         saveD.save(function(err) {                  // сохраняем наши данные
-                            if (err) throw err;
+                            if (err) { console.log(err) }
                         });
                     });
                 }
@@ -32,7 +34,7 @@ module.exports = function(callback) {
             yum+=1; // считаем записанные файлы
             // если количество записанных файлов равна их количеству вмассиве jsonFiles, запускаем колбек
             if ( yum==dirArr.length ){
-                callback(null,true)
+                callback(null, "Все jsonFiles записаны")
             }
         });
     });
